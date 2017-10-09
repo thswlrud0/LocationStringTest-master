@@ -24,6 +24,8 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RadioGroup;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -59,26 +61,25 @@ public class addData extends AppCompatActivity {
 
     private EditText mDataContent;
     private EditText mUserName;
-    private ImageButton mAlbumCamera;
+    private Button mAlbumCamera;
     private Button mUploadButton;
-    private ImageView mImageView;
-    private UserModel mUserModel= new UserModel();
+    private ImageView showImage;
+    private UserModel mUserModel = new UserModel();
     private CheckBox mCheckBox;     ////////////////////
-    private Button mSetLocation;
-
-
+    //private Button mSetLocation;
+    private Switch mSwitch;
     public int mNumber;
-    private String hahaha;
 
     private static final String TAG2 = "locationStringTest";
 
     private GoogleApiClient mClient;
 
     private static final String TAG = "addData";
-    private Uri filePath;
+     private Uri filePath;
+     private Uri mURI;
 
     DatabaseReference mDataset = FirebaseDatabase.getInstance().getReference();
-    DatabaseReference myRef= mDataset.child("users");
+    DatabaseReference myRef = mDataset.child("users");
     DatabaseReference mDataRefCheck = mDataset.child("Checkbox");
 
     public static Intent newIntent(Context packageContext) {
@@ -105,8 +106,8 @@ public class addData extends AppCompatActivity {
                     }
                 })
                 .build();
-
-        mAlbumCamera = (ImageButton) findViewById(R.id.Album_camera);
+        showImage = (ImageView)findViewById(R.id.real_image);
+        mAlbumCamera = (Button) findViewById(R.id.upload_Button);
         mAlbumCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -122,7 +123,21 @@ public class addData extends AppCompatActivity {
         mDataContent.setText(" ");
         mUserName = (EditText) findViewById(R.id.inputName);
         mUserName.setText(" ");
+        mSwitch = (Switch) findViewById(R.id.switch1);
+        mSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                //Toast.makeText(addData.this, "체크상태 = " + b, Toast.LENGTH_SHORT).show();
+                if(b == true){
+                    findImage();
+                }else{
+                    mUserModel.setLongtitude(0);
+                    mUserModel.setLongtitude(0);
+                }
+            }
+        });
 
+/*
         mSetLocation = (Button)findViewById(R.id.findLocation);
         mSetLocation.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -130,11 +145,14 @@ public class addData extends AppCompatActivity {
                 findImage();
             }
         });
+*/
         mUploadButton = (Button) findViewById(R.id.dataUploadButton);
         mUploadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 //업로드
+
+                uploadFile();
 
                 String realText = mDataContent.getText().toString().trim();
                 String firstName = mUserName.getText().toString().trim();
@@ -145,13 +163,16 @@ public class addData extends AppCompatActivity {
                 //왜 하나는 되고 여러개는 멈출까...
                 bindEdit.child("firstName").setValue(firstName);
                 bindEdit.child("location").setValue(mUserModel.getLocation());
-                bindEdit.child("age").setValue(1);
+                bindEdit.child("longtitude").setValue(mUserModel.getLongtitude());
+                bindEdit.child("age").setValue(0);
                 bindEdit.child("key").setValue(bindEdit.getKey());
+                bindEdit.child("hate").setValue(0);
+                bindEdit.child("imageURI").setValue(mURI);
 
                 mDataContent.setText("");
                 mUserName.setText("");
 
-                // uploadFile();
+
 
                 mDataContent.addTextChangedListener(new TextWatcher() {
                     @Override
@@ -175,8 +196,8 @@ public class addData extends AppCompatActivity {
             }
         });
 
-        mImageView = (ImageView) findViewById(R.id.visit_photo);
-
+        //  mImageView = (ImageView) findViewById(R.id.visit_photo);
+/*
         mCheckBox = (CheckBox) findViewById(R.id.checkBox);
         mCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -185,24 +206,27 @@ public class addData extends AppCompatActivity {
                 mDataRefCheck.setValue(mNumber);
             }
         });
+        */
+
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        //request코드가 0이고 OK를 선택했고 data에 뭔가가 들어 있다면
-        if (requestCode == 0 && resultCode == RESULT_OK) {
-            filePath = data.getData();
-            Log.d(TAG, "uri:" + String.valueOf(filePath));
-            try {
-                //Uri 파일을 Bitmap으로 만들어서 ImageView에 집어 넣는다.
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
-                mImageView.setImageBitmap(bitmap);
-            } catch (IOException e) {
-                e.printStackTrace();
+            super.onActivityResult(requestCode, resultCode, data);
+            //request코드가 0이고 OK를 선택했고 data에 뭔가가 들어 있다면
+            if (requestCode == 0 && resultCode == RESULT_OK) {
+                filePath = data.getData();
+                Log.d(TAG, "uri:" + String.valueOf(filePath));
+                try {
+                    //Uri 파일을 Bitmap으로 만들어서 ImageView에 집어 넣는다.
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
+                    showImage.setImageBitmap(bitmap);
+                    mURI = filePath;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
-    }
 
     @Override
     protected void onStart() {
@@ -231,6 +255,7 @@ public class addData extends AppCompatActivity {
         super.onPause();
 
     }
+
     @Override
     public void onStop() {
         super.onStop();
@@ -310,6 +335,7 @@ public class addData extends AppCompatActivity {
 
     }
 
+
     private void findImage() {
         LocationRequest request = LocationRequest.create();
         request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -317,7 +343,6 @@ public class addData extends AppCompatActivity {
         request.setInterval(0);
 
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                 //
 
             return;
         }
@@ -327,6 +352,7 @@ public class addData extends AppCompatActivity {
                     public void onLocationChanged(Location location) {
                         Log.i(TAG2, "Got a fix: " + location);
                         mUserModel.setLocation(location.getAltitude());
+                        mUserModel.setLongtitude(location.getLongitude());
                     }
                 });
     }

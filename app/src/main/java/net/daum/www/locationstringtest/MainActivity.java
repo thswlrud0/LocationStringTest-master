@@ -20,6 +20,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -57,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
     private mLocationModel mLocationModel = new mLocationModel();
 
     private TextView mEmptyText;
+    private static int flag = 0;
 
     public static Intent newIntent(Context packageContext) {
         Intent intent = new Intent(packageContext, MainActivity.class);
@@ -67,7 +69,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
 
         mClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
@@ -84,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
                 })
                 .build();
 
-        mEmptyText = (TextView)findViewById(R.id.text_no_data);
+        mEmptyText = (TextView) findViewById(R.id.text_no_data);
         mDatabase = FirebaseDatabase.getInstance();
         mReference = mDatabase.getReference("users");
         result = new ArrayList<>();
@@ -98,9 +99,11 @@ public class MainActivity extends AppCompatActivity {
         mAdapter = new UserAdapter(result);
         mRecyclerView.setAdapter(mAdapter);
 
+
         updateList();
         checkIfEmpty();
     }
+
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
@@ -111,37 +114,42 @@ public class MainActivity extends AppCompatActivity {
                 break;
 
             case 1:
-             //   removeLocation(item.getGroupId());
-
-                //changeUser(item.getGroupId());
-
+                Good_up(item.getGroupId());
+               // changeUser(item.getGroupId());
+                break;
+            case 2:
+                hate_test(item.getGroupId());
                 break;
         }
         return super.onContextItemSelected(item);
     }
 
     private void updateList() {
-
         mReference.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+
                 result.add(dataSnapshot.getValue(UserModel.class));
                 mAdapter.notifyDataSetChanged();
 
+                //flag = 1;
+
                 checkIfEmpty();
             }
-//
+
+            //
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
 /*
-                UserModel model = dataSnapshot.getValue(UserModel.class);
-                int index = getItemIndex(model);
-
-                result.set(index, model);
-
-                mAdapter.notifyItemChanged(index);
+                if(flag ==0) {
+                    UserModel model = dataSnapshot.getValue(UserModel.class);
+                    int index = getItemIndex(model);
+                    result.set(index, model);
+                    mAdapter.notifyItemChanged(index);
+                }
 */
             }
+
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
@@ -168,34 +176,69 @@ public class MainActivity extends AppCompatActivity {
     private int getItemIndex(UserModel user) {
         int index = -1;
 
-            for (int i = 0; i < result.size(); i++) {
-                if (result.get(i).key.equals(user.key)) {
-                    index = i;
-                    break;
-                }
+        for (int i = 0; i < result.size(); i++) {
+            if (result.get(i).key.equals(user.key)) {
+                index = i;
+                break;
             }
+        }
 
         return index;
     }
 
-
-    private void removeUser(int position){
-        mReference.child(result.get(position).key).removeValue();
-
+    private void Good_up(int position){
+        UserModel user = result.get(position);
+        user.age++;
+     //   updateList();
+        mReference.child(result.get(position).key).child("age").setValue(user.age);
+        mAdapter.notifyItemChanged(position);
     }
 
-    /* 따로 만든곳 */
-    private void removeLocation(int position){
+    private void hate_test(int position) {
         UserModel user = result.get(position);
-
-        if(user.location >= mLocationModel.getAltitude()) {
+        user.hate++;
+        mReference.child(result.get(position).key).child("hate").setValue(user.hate);
+        if (user.hate >= user.age && user.hate >= 10) {
             mReference.child(result.get(position).key).removeValue();
+        }
+        mAdapter.notifyItemChanged(position);
+    }
+
+    private void removeUser(int position) {
+        mReference.child(result.get(position).key).removeValue();
+    }
+
+
+    private void getLocationText(List<UserModel> mlist) {
+        //findImage();
+        Double x, y, z, b;
+        Double cx, cy, cz, cb;
+        for (int i = 0; i < mlist.size(); i++) {
+            UserModel model = mlist.get(i);
+
+            //왜 두번째부터안될까
+
+            x = model.getLocation() - 0.00005;
+            y = model.getLocation() + 0.00005;
+            z = model.getLongtitude() - 0.00005;
+            b = model.getLongtitude() + 0.00005;
+            cx = mLocationModel.getAltitude();
+            cy = mLocationModel.getAltitude();
+            cz = mLocationModel.getLongtitude();
+            cb = mLocationModel.getLongtitude();
+
+            if ((x > cx) || (y < cy)
+                    || (z > cz) || (b < cb)) {
+                //두번눌러야 되니까 그런것
+                mlist.remove(model);
+                mAdapter.notifyDataSetChanged();
+                i--;
+            }
         }
     }
 
-    private void changeUser(int position){
+    private void changeUser(int position) {
         UserModel user = result.get(position);
-        user.age=100;
 
         Map<String, Object> userValues = user.toMap();
         Map<String, Object> newUser = new HashMap<>();
@@ -205,11 +248,11 @@ public class MainActivity extends AppCompatActivity {
         mReference.updateChildren(newUser);
     }
 
-    private void checkIfEmpty(){
-        if(result.size() == 0){
+    private void checkIfEmpty() {
+        if (result.size() == 0) {
             mRecyclerView.setVisibility(View.INVISIBLE);
             mEmptyText.setVisibility(View.VISIBLE);
-        }else{
+        } else {
             mRecyclerView.setVisibility(View.VISIBLE);
             mEmptyText.setVisibility(View.INVISIBLE);
         }
@@ -220,7 +263,6 @@ public class MainActivity extends AppCompatActivity {
 
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.fragment_crime_list, menu);
-
         return true;
 
     }
@@ -235,14 +277,20 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
                 return true;
 
+            case R.id.setting_location_visit:
+                Toast.makeText(this, "set visitorBook", Toast.LENGTH_SHORT).show();
+                //getLocationText(result);
+                findImage();
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
+
+        flag = 0;
 
         int errorCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
         if (errorCode != ConnectionResult.SUCCESS) {
@@ -258,16 +306,18 @@ public class MainActivity extends AppCompatActivity {
 
             errorDialog.show();
         }
+
     }
 
     @Override
-    public void onStart(){
+    public void onStart() {
         super.onStart();
 
         invalidateOptionsMenu();
         mClient.connect();
-    }
 
+
+    }
 
     @Override
     public void onStop() {
@@ -287,18 +337,18 @@ public class MainActivity extends AppCompatActivity {
                 ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
 
-            return;
         }
         LocationServices.FusedLocationApi
                 .requestLocationUpdates(mClient, request, new LocationListener() {
                     @Override
                     public void onLocationChanged(Location location) {
                         Log.i(TAG, "Got a fix: " + location);
-                        // mUserModel.setLocation(" " + location.getAltitude());
                         mLocationModel.setAltitude(location.getAltitude());
                         mLocationModel.setLongtitude(location.getLongitude());
+                        getLocationText(result);
                     }
                 });
     }
 }
+
 
