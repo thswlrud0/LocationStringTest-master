@@ -6,21 +6,16 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.support.design.widget.FloatingActionButton;
+import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
-import android.util.FloatProperty;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,7 +30,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,7 +41,6 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private List<UserModel> result;
     private UserAdapter mAdapter;
-
     private FirebaseDatabase mDatabase;
     private DatabaseReference mReference;
 
@@ -77,7 +70,6 @@ public class MainActivity extends AppCompatActivity {
                     public void onConnected(Bundle bundle) {
                         invalidateOptionsMenu();
                     }
-
                     @Override
                     public void onConnectionSuspended(int i) {
 
@@ -95,10 +87,8 @@ public class MainActivity extends AppCompatActivity {
         llm.setOrientation(LinearLayoutManager.VERTICAL);
 
         mRecyclerView.setLayoutManager(llm);
-
         mAdapter = new UserAdapter(result);
         mRecyclerView.setAdapter(mAdapter);
-
 
         updateList();
         checkIfEmpty();
@@ -112,7 +102,6 @@ public class MainActivity extends AppCompatActivity {
             case 0:
                 removeUser(item.getGroupId());
                 break;
-
             case 1:
                 Good_up(item.getGroupId());
                // changeUser(item.getGroupId());
@@ -149,7 +138,6 @@ public class MainActivity extends AppCompatActivity {
                 }
 */
             }
-
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
@@ -218,10 +206,10 @@ public class MainActivity extends AppCompatActivity {
 
             //왜 두번째부터안될까
 
-            x = model.getLocation() - 0.00005;
-            y = model.getLocation() + 0.00005;
-            z = model.getLongtitude() - 0.00005;
-            b = model.getLongtitude() + 0.00005;
+            x = model.getLocation() - 0.0001;
+            y = model.getLocation() + 0.0001;
+            z = model.getLongtitude() - 0.0001;
+            b = model.getLongtitude() + 0.0001;
             cx = mLocationModel.getAltitude();
             cy = mLocationModel.getAltitude();
             cz = mLocationModel.getLongtitude();
@@ -296,7 +284,6 @@ public class MainActivity extends AppCompatActivity {
         if (errorCode != ConnectionResult.SUCCESS) {
             Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(errorCode, this, REQUEST_ERROR,
                     new DialogInterface.OnCancelListener() {
-
                         @Override
                         public void onCancel(DialogInterface dialog) {
                             //서비스를 사용할 수 없으면 실행을 중단한다.
@@ -315,7 +302,6 @@ public class MainActivity extends AppCompatActivity {
 
         invalidateOptionsMenu();
         mClient.connect();
-
 
     }
 

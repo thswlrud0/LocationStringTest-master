@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:padding="5dp"
+    tools:context="com.daum.net.locationstringtest">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="3">
+
+        <Button
+            android:id="@+id/btn_previous"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="PREVIOUS"
+            android:textSize="10sp"
+            android:onClick="mOnClick"
+            />
+
+        <Button
+            android:id="@+id/B_next"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="mOnClick"
+            android:text="NEXT"
+            android:textSize="10sp" />
+
+        <Button
+            android:id="@+id/nextpage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="NEXT PAGE"
+            android:textSize="10sp"
+
+            />
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Welcome To Korea!"
+            android:textSize="50sp"
+            android:gravity="center_horizontal"
+            />
+    </LinearLayout>
+
+    <ViewFlipper
+        android:id="@+id/flipper"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+
+        <ImageView
+            android:id="@+id/two"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/two"/>
+
+        <ImageView
+            android:id="@+id/suwon"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/suwon"/>
+
+        <ImageView
+            android:id="@+id/frontpage"
+            android:layout_width="match_parent"
+            android:layout_height="375dp"
+            android:src="@drawable/frontpage" />
+
+        <ImageView
+            android:id="@+id/lotte"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/lotte" />
+
+
+    </ViewFlipper>
+</LinearLayout>
